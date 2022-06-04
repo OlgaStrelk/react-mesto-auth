@@ -15,6 +15,7 @@ import Login from "./Login";
 import Register from "./Register";
 import InfoTooltip from "./InfoTooltip";
 import ProtectedRoute from "./ProtectedRoute";
+import { register, authorize, getContent } from "../utils/AuthAPI";
 
 function App() {
   const [currentUser, setCurrentUser] = useState({});
@@ -26,6 +27,7 @@ function App() {
   const [cardDelete, setCardDelete] = useState(null);
   const [cards, setCards] = useState([]);
   const [isLoggedIn, setLoggedIn] = useState(false);
+  const [tooltipStatus, setTooltipStatus] = React.useState();
 
   useEffect(() => {
     api
@@ -99,6 +101,7 @@ function App() {
     setEditAvatarPopupOpen(false);
     setAddPlacePopupOpen(false);
     handleCardClick(null);
+    setTooltipStatus();
   };
 
   const handleCardLike = (card) => {
@@ -128,6 +131,25 @@ function App() {
       })
       .catch((err) => console.log(`При удалении карточки: ${err}`));
   };
+
+  const history = useHistory();
+
+  function onRegister({ email, password }) {
+    register(email, password)
+      .then(() => {
+        history.push("/signin");
+        setTooltipStatus({
+          text: "Вы успешно зарегистрировались",
+          iconType: "success",
+        });
+      })
+      .catch(() => {
+        setTooltipStatus({
+          text: "Что-то пошло не так!  Попробуйте ещё раз.",
+          iconType: "error",
+        });
+      });
+  }
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
@@ -182,7 +204,7 @@ function App() {
               </ProtectedRoute>
 
               <Route path="/sign-up">
-                <Register />
+                <Register onRegister={onRegister} />
               </Route>
 
               <Route path="/sign-in">
@@ -195,7 +217,11 @@ function App() {
             </Switch>
 
             <Footer />
-            <InfoTooltip isOpen={false} />
+            <InfoTooltip
+              isOpen={!!tooltipStatus}
+              onClose={closeAllPopups}
+              status={tooltipStatus}
+            />
           </div>
         </div>
       </div>

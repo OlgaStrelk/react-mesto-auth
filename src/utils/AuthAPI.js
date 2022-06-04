@@ -1,7 +1,7 @@
 export const BASE_URL = "https://auth.nomoreparties.co";
 
 export const register = (email, password) => {
-  return fetch(`${BASE_URL}/auth/local/signup`, {
+  return fetch(`${BASE_URL}/signup`, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -18,7 +18,7 @@ export const register = (email, password) => {
     .catch((err) => console.log(err));
 };
 export const authorize = (email, password) => {
-  return fetch(`${BASE_URL}/auth/local/signin`, {
+  return fetch(`${BASE_URL}/signin`, {
     method: "POST",
     headers: {
       Accept: "application/json",
