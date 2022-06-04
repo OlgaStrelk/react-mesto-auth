@@ -28,6 +28,7 @@ function App() {
   const [cards, setCards] = useState([]);
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [tooltipStatus, setTooltipStatus] = React.useState();
+  const [email, setEmail] = React.useState('');
 
   useEffect(() => {
     api
@@ -151,6 +152,21 @@ function App() {
       });
   }
 
+  function onLogin({ email, password }){
+    authorize(email, password)
+      .then(() => {
+        setLoggedIn(true);
+        setEmail(email);
+        history.push('/');
+      })
+      .catch(() => {
+        setTooltipStatus({
+          text: 'Что-то пошло не так! Попробуйте ещё раз.', 
+          iconType: 'error'
+        });
+      })
+  }
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="App">
@@ -208,7 +224,7 @@ function App() {
               </Route>
 
               <Route path="/sign-in">
-                <Login />
+                <Login onLogin={onLogin} />
               </Route>
 
               <Route path="*">
