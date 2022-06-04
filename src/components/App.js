@@ -13,7 +13,8 @@ import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
 import Login from "./Login";
 import Register from "./Register";
-import InfoTooltip from './InfoTooltip';
+import InfoTooltip from "./InfoTooltip";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
   const [currentUser, setCurrentUser] = useState({});
@@ -135,7 +136,7 @@ function App() {
           <div className="page__container">
             <Header />
             <Switch>
-              <Route exact path="/">
+              <ProtectedRoute exact path="/">
                 <Main
                   cards={cards}
                   onEditeProfile={handleEditProfileClick}
@@ -178,19 +179,23 @@ function App() {
                   selectedCard={selectedCard}
                   onClose={closeAllPopups}
                 />
-              </Route>
+              </ProtectedRoute>
+
               <Route path="/sign-up">
                 <Register />
               </Route>
+
               <Route path="/sign-in">
                 <Login />
               </Route>
+
               <Route path="*">
-                {isLoggedIn ? <Redirect to="/" /> : <Redirect to="" />}
+                {isLoggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
               </Route>
             </Switch>
+
             <Footer />
-            <InfoTooltip isOpen={false}/>
+            <InfoTooltip isOpen={false} />
           </div>
         </div>
       </div>
