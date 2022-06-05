@@ -215,6 +215,7 @@ function App() {
                   selectedCard={selectedCard}
                   onCardDelete={handleCardDeleteRequest}
                 />
+              </ProtectedRoute>
 
                 <PopupWithForm
                   title="Вы уверены?"
@@ -247,7 +248,6 @@ function App() {
                   selectedCard={selectedCard}
                   onClose={closeAllPopups}
                 />
-              </ProtectedRoute>
 
               <Route path="/sign-up">
                 <Register onRegister={onRegister} />
