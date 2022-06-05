@@ -29,7 +29,6 @@ function App() {
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [tooltipStatus, setTooltipStatus] = useState();
   const [email, setEmail] = useState("");
-  const [isAuthChecking, setAuthChecking] = useState(true);
   const history = useHistory();
 
   useEffect(() => {
@@ -60,7 +59,6 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem("jwt");
     if (token) {
-      setAuthChecking(true);
       checkToken(token)
         .then((res) => {
           setEmail(res.data.email);
@@ -69,10 +67,7 @@ function App() {
         })
         .catch(() => {
           localStorage.removeItem("jwt");
-        })
-        .finally(() => setAuthChecking(false));
-    } else {
-      setAuthChecking(false);
+        });
     }
   }, [history]);
 
@@ -203,7 +198,11 @@ function App() {
           <div className="page__container">
             <Header email={email} onSignOut={onSignOut} />
             <Switch>
-              <ProtectedRoute exact path="/" loggedIn={isLoggedIn}>
+              <ProtectedRoute
+                exact
+                path="/"
+                loggedIn={isLoggedIn}
+              >
                 <Main
                   cards={cards}
                   onEditeProfile={handleEditProfileClick}
