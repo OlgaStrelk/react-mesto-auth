@@ -1,6 +1,6 @@
 const BASE_URL = "https://auth.nomoreparties.co";
 
-fuction checkResponse(res) { 
+function checkResponse(res) { 
         return res.ok ? res.json() : Promise.reject(res.status)
     } 
 
