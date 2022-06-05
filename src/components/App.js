@@ -15,7 +15,7 @@ import Login from "./Login";
 import Register from "./Register";
 import InfoTooltip from "./InfoTooltip";
 import ProtectedRoute from "./ProtectedRoute";
-import { register, authorize, getContent } from "../utils/AuthAPI";
+import { register, authorize, checkToken } from "../utils/AuthAPI";
 
 function App() {
   const [currentUser, setCurrentUser] = useState({});
@@ -27,18 +27,24 @@ function App() {
   const [cardDelete, setCardDelete] = useState(null);
   const [cards, setCards] = useState([]);
   const [isLoggedIn, setLoggedIn] = useState(false);
-  const [tooltipStatus, setTooltipStatus] = React.useState();
-  const [email, setEmail] = React.useState('');
+  const [tooltipStatus, setTooltipStatus] = useState();
+  const [email, setEmail] = useState("");
+  const [isAuthChecking, setAuthChecking] = useState(true);
+  const history = useHistory();
 
   useEffect(() => {
-    api
-      .getProfile()
-      .then((data) => {
-        setCurrentUser(data);
-      })
+    if (isLoggedIn) {
+      api
+        .getProfile()
+        .then((data) => {
+          setCurrentUser(data);
+        })
 
-      .catch((err) => console.log(`При загрузке данных пользователя: ${err}`));
-  }, []);
+        .catch((err) =>
+          console.log(`При загрузке данных пользователя: ${err}`)
+        );
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
     api
@@ -50,6 +56,25 @@ function App() {
         console.log(`При загрузке первоначального массива карточек: ${err}`)
       );
   }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    if (token) {
+      setAuthChecking(true);
+      checkToken(token)
+        .then((res) => {
+          setEmail(res.data.email);
+          setLoggedIn(true);
+          history.push("/");
+        })
+        .catch(() => {
+          localStorage.removeItem("jwt");
+        })
+        .finally(() => setAuthChecking(false));
+    } else {
+      setAuthChecking(false);
+    }
+  }, [history]);
 
   const handleUpdateUser = (userUpdate) => {
     api
@@ -133,12 +158,10 @@ function App() {
       .catch((err) => console.log(`При удалении карточки: ${err}`));
   };
 
-  const history = useHistory();
-
-  function onRegister({ email, password }) {
+  const onRegister = ({ email, password }) => {
     register(email, password)
       .then(() => {
-        history.push("/signin");
+        history.push("/sign-in");
         setTooltipStatus({
           text: "Вы успешно зарегистрировались",
           iconType: "success",
@@ -150,31 +173,37 @@ function App() {
           iconType: "error",
         });
       });
-  }
+  };
 
-  function onLogin({ email, password }){
+  const onLogin = ({ email, password }) => {
     authorize(email, password)
       .then(() => {
         setLoggedIn(true);
         setEmail(email);
-        history.push('/');
+        history.push("/");
       })
       .catch(() => {
         setTooltipStatus({
-          text: 'Что-то пошло не так! Попробуйте ещё раз.', 
-          iconType: 'error'
+          text: "Что-то пошло не так! Попробуйте ещё раз.",
+          iconType: "error",
         });
-      })
-  }
+      });
+  };
+
+  const onSignOut = () => {
+    localStorage.removeItem("jwt");
+    setLoggedIn(false);
+    history.push("/sign-in");
+  };
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="App">
         <div className="page">
           <div className="page__container">
-            <Header />
+            <Header email={email} onSignOut={onSignOut} />
             <Switch>
-              <ProtectedRoute exact path="/">
+              <ProtectedRoute exact path="/" loggedIn={isLoggedIn}>
                 <Main
                   cards={cards}
                   onEditeProfile={handleEditProfileClick}
